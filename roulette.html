@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ルーレット</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <script>
+    var interval_id;
+    var start_flag = false;
+    var roulette_number = 16;//ルーレットの個数を指定する
+    var count = 0;//ルーレットが何回行われているか
+
+    //初期化（リセット用)の配列
+    var roulette_list = new Array();
+    for (let i = 0; i < roulette_number; i++) {
+      roulette_list[i] = i + 1;
+    }
+
+    //使用する配列
+    var use_roulette_list = roulette_list.slice(0, roulette_list.length);
+    //ランダムに選んだルーレットの数字を代入
+    var list_number = 0;
+
+    //ルーレット開始
+    function start_roulette() {
+      if (start_flag === false) {
+
+        //ストップ削除
+        if (count > 0) { delete_number(); }
+        // 実行
+        interval_id = setInterval(select_number, 100);
+        count += 1;
+        start_flag = true;
+      }
+    }
+
+
+
+    //スタートを再開するときに、止まったマスを削除する
+    function delete_number() {
+      let box = document.getElementById("num" + use_roulette_list[list_number]);
+      box.style.backgroundColor = "orange";//ストップした背景
+      box.style.opacity = "0.5";//透明度
+      // 選択したボックスを配列から消す。
+      use_roulette_list.splice(list_number, 1);
+      //削除したことを示す
+      list_number = -1;
+    }
+
+    // ルーレットの中から一つ選択する
+    function select_number() {
+
+      //配列が削除されていない場合ボックスの背景を戻す
+      if (list_number !== -1) {
+        document.getElementById("num" + use_roulette_list[list_number])
+          .style.backgroundColor = "white";
+      }
+
+      // 1つランダムに選ぶ（配列の中を指定のため0~length(randomが未満のため)）
+      list_number = Math.floor(Math.random() * (use_roulette_list.length));
+
+      //選んだボックスを光らせる
+      document.getElementById("num" + use_roulette_list[list_number])
+        .style.backgroundColor = "orange";
+    }
+
+    //ストップ
+    function stop_roulette() {
+      //start が最後まで処理行ったとき
+      if (list_number !== -1) {
+        // setIntervalによる繰り返し動作を停止
+        clearInterval(interval_id);
+        start_flag = false;
+        //ルーレットにすべて止まったらstartを停止
+        if (use_roulette_list.length === 1) {
+          document.getElementById('start').disabled = true;
+        }
+      }
+    }
+
+    //リセット
+    function reset_roulette() {
+      clearInterval(interval_id);
+      start_flag = false;
+
+      count = 0;
+      use_roulette_list = roulette_list.slice(0, roulette_list.length);
+      document.getElementById('start').disabled = false;
+      //背景色と透明度をリセット
+      for (let i = 0; i < roulette_number; i++) {
+        var reset_box = document.getElementById("num" + (i + 1));
+        reset_box.style.backgroundColor = "white";
+        reset_box.style.opacity = "1";//透明度
+      }
+    }
+
+    //roulette_numberの数に応じたルーレットのボックスを作成
+    function add_number_box() {
+      var box = document.getElementById("roulette");
+      for (let i = 1; i <= roulette_number; i++) {
+        var number_box = document.createElement("div");
+        number_box.classList.add("number_box");
+        number_box.id = "num" + i;
+        box.appendChild(number_box);
+
+        var number = document.createElement("div");
+        number.classList.add("number");
+        number.innerHTML = i;
+        number_box.appendChild(number);
+      }
+    }
+
+    //html読み込み後実行
+    window.onload = function () {
+      add_number_box();
+      var start = document.getElementById("start");
+      start.addEventListener("click", start_roulette, false);
+      var stop = document.getElementById("stop");
+      stop.addEventListener("click", stop_roulette, false);
+      var reset = document.getElementById("reset");
+      reset.addEventListener("click", reset_roulette, false);
+    };
+  </script>
+</head>
+
+<body>
+  <div id="main">
+    <div id="roulette"></div>
+
+    <div id="buttons">
+      <button class="button" id="start">スタート</button>
+      <button class="button" id="stop">ストップ</button>
+      <button class="button" id="reset">リセット</button>
+    </div>
+  </div>
+</body>
+
+</html>
